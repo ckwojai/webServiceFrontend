@@ -5,6 +5,20 @@ import {
   debounceTime, distinctUntilChanged, switchMap
 } from 'rxjs/operators';
 
+
+
+export interface SakilaKeys {
+  customers: string[];
+  films: string[];
+  stores: string[];
+};
+// Hardcode Search Options for each Collections
+const SEARCH_BY_LIST: SakilaKeys = {
+  customers: ["_id", "First Name", "Last Name", "Address", "City", "Country", "District", "Phone"],
+  films: ["_id", "Title", "Category", "Length", "Rating", "Rental Duration", "Replacement Cost", "Special Features"],
+  stores: ["_id", "Address", "City", "Country", "Manager First Name", "Manager Last Name", "Phone"]
+};
+
 @Component({
   selector: 'app-sakila-search',
   templateUrl: './sakila-search.component.html',
@@ -12,19 +26,28 @@ import {
 })
 
 export class SakilaSearchComponent implements OnInit {
-  coltnNames: string[] = ["customers", "films", "stores"];
-  searchByList$: string[] = [];
+  searchBoxValue: string;
+  coltnNames: string[] = ["customers", "films", "stores"]; // Hardcode Collection Names
+  searchByList: SakilaKeys = SEARCH_BY_LIST;
 
-  selectedColtn: string = "";
-  selectedKey: string = "";
   searchResults$: Observable<any[]>;
+
+  selectedColtn: string = "films";
+  selectedKey: string = "Title";
+
   private searchTerms = new Subject<string>();
   search(term: string): void {
     this.searchTerms.next(term);
   }
-  onButtonClick(coltn: string) {
-    this.sakilaService.fetchKeys(coltn).
-      subscribe(list => this.searchByList$ = list);
+  // Reset Input Field and Json results when Collection / Search Key is re-selected
+  onColtnClicked(coltnName: string): void {
+    this.selectedKey = this.searchByList[coltnName][1];
+    this.searchBoxValue = "";
+    this.searchTerms.next("");
+  }
+  onSearchKeyClicked(): void {
+    this.searchBoxValue = "";
+    this.searchTerms.next("")
   }
   constructor(
     private sakilaService: SakilaService
